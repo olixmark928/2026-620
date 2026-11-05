@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 TBA 四極燈塔 620 挑戰 - 139衝衝隊加油站</title>
+  <meta name="description" content="2026 TBA 四極燈塔 620 挑戰 139衝衝隊專屬線上應援加油站，提供按讚、加油、拍手熱血集氣與戰報分享。">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome 圖標 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google 字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti 慶祝特效 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #eef2ff 100%);
+      min-height: 100vh;
+    }
+
+    .font-chakra {
+      font-family: 'Chakra Petch', monospace, sans-serif;
+    }
+
+    /* 浮動粒子動畫 */
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+      }
+      50% {
+        opacity: 0.9;
+        transform: translateY(-75px) scale(1.35) rotate(12deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-160px) scale(1.6) rotate(-12deg);
+      }
+    }
+
+    .floating-emoji {
+      position: fixed;
+      pointer-events: none;
+      animation: floatUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      font-size: 3.5rem;
+      z-index: 9999;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+      user-select: none;
+    }
+
+    /* 按鈕點擊縮放 */
+    .cheer-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cheer-btn:active {
+      transform: scale(0.93);
+    }
+
+    /* 數字脈衝動畫 */
+    @keyframes numberPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25); color: #2563eb; }
+      100% { transform: scale(1); }
+    }
+
+    .count-pop {
+      animation: numberPulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+  <!-- 頂部導覽列 -->
+  <header class="border-b border-slate-200/70 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="container mx-auto px-4 max-w-4xl h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-person-biking text-lg"></i>
+        </div>
+        <div>
+          <span class="font-black text-slate-900 tracking-tight text-base sm:text-lg flex items-center gap-1.5">
+            139衝衝隊
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">TBA 620</span>
+          </span>
+          <p class="text-[11px] text-slate-500 font-medium">四極燈塔挑戰加油站</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- 敲響車鈴 -->
+        <button onclick="triggerBicycleBell(event)" class="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 sm:px-3.5 rounded-full shadow-sm hover:shadow transition-all text-xs active:scale-95 cursor-pointer" title="按一下敲響加油車鈴叮叮">
+          <i class="fa-solid fa-bell animate-bounce"></i>
+          <span class="hidden sm:inline">敲車鈴 叮叮！</span>
+          <span class="sm:hidden">車鈴</span>
+        </button>
+
+        <!-- 音效開關 -->
+        <button id="sound-btn" onclick="toggleSound()" class="p-2 rounded-full border bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all cursor-pointer" title="音效開關">
+          <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="container mx-auto px-4 py-6 md:py-8 max-w-4xl flex-grow">
+    
+    <!-- 頁頭大卡片 -->
+    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-6 md:p-8 mb-8 text-center border border-blue-100/80 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
+
+      <div class="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 px-5 py-2 rounded-full text-base md:text-lg font-black mb-3 border border-blue-200/70 shadow-sm">
+        <i class="fa-solid fa-flag-checkered text-blue-600"></i>
+        <span>139衝衝隊 · 極限挑戰團</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-3">
+        2026 TBA 四極燈塔 620 挑戰
+      </h1>
+      <p class="text-slate-600 text-base md:text-lg max-w-xl mx-auto font-medium">
+        點擊下方按鈕，為挑戰 620 公里極限的隊友們送上滿滿的能量與祝福！🔥
+      </p>
+
+      <!-- 里程碑進度條 -->
+      <div class="mt-6 pt-5 border-t border-slate-100 max-w-xl mx-auto">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+          <span class="flex items-center gap-1.5 text-slate-700">
+            <i class="fa-regular fa-compass text-blue-600"></i>
+            <span id="gauge-station-text">路線進度：已通過 0 / 8 站</span>
+          </span>
+          <span id="gauge-cheer-text" class="text-blue-600 font-chakra text-sm">
+            0 / 615 應援火力 (0%)
+          </span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3.5 p-0.5 overflow-hidden border border-slate-200/60 shadow-inner">
+          <div id="gauge-bar" class="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500 transition-all duration-500 ease-out" style="width: 5%"></div>
+        </div>
+        <div class="flex justify-between text-[11px] text-slate-400 mt-1.5 font-medium">
+          <span>福隆 (0km)</span>
+          <span>富貴角 (75km)</span>
+          <span>國聖港 (425km)</span>
+          <span>墾丁海山 (615km)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 三大分頁切換按鈕 -->
+    <div class="flex p-1 bg-slate-200/70 rounded-2xl mb-6 max-w-md mx-auto">
+      <button id="tab-btn-cheer" onclick="switchTab('cheer')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>按讚加油</span>
+      </button>
+      <button id="tab-btn-lighthouses" onclick="switchTab('lighthouses')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>四極燈塔路線</span>
+      </button>
+      <button id="tab-btn-shoutouts" onclick="switchTab('shoutouts')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+        <i class="fa-regular fa-comment-dots"></i>
+        <span>打氣留言版</span>
+      </button>
+    </div>
+
+    <!-- 分頁 1: 按讚加油 -->
+    <div id="tab-content-cheer">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 mb-8">
+        
+        <!-- 1. 按讚卡片 -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 text-center shadow-lg shadow-blue-500/5 border-2 border-blue-100 hover:border-blue-300 transition-all duration-200 hover:-translate-y-1 relative group">
+          <button id="btn-like" onclick="triggerCheer('like', '👍', event)" class="cheer-btn w-full flex flex-col items-center focus:outline-none cursor-pointer">
+            <span class="text-7xl md:text-8xl mb-3 transform group-hover:scale-110 transition-transform select-none filter drop-shadow-sm">👍</span>
+            <span class="text-2xl md:text-3xl font-black text-slate-800 mb-1 tracking-wide">按讚</span>
+            <span class="text-blue-600 bg-blue-50 px-3 py-0.5 rounded-full text-xs font-bold mb-4">讚爆全場 · 勢不可擋</span>
+          </button>
+          <div class="bg-gradient-to-b from-blue-50 to-blue-100/50 rounded-2xl py-3 px-4 border border-blue-200/60">
+            <span class="text-xs text-blue-600 font-bold block mb-0.5">累積讚數</span>
+            <span id="count-like" class="text-4xl md:text-5xl font-black text-blue-600 font-chakra tracking-tight block">0</span>
+          </div>
+        </div>
+
+        <!-- 2. 加油卡片 -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 text-center shadow-lg shadow-amber-500/5 border-2 border-amber-100 hover:border-amber-300 transition-all duration-200 hover:-translate-y-1 relative group">
+          <button id="btn-power" onclick="triggerCheer('power', '💪', event)" class="cheer-btn w-full flex flex-col items-center focus:outline-none cursor-pointer">
+            <span class="text-7xl md:text-8xl mb-3 transform group-hover:scale-110 transition-transform select-none filter drop-shadow-sm">💪</span>
+            <span class="text-2xl md:text-3xl font-black text-slate-800 mb-1 tracking-wide">加油</span>
+            <span class="text-amber-700 bg-amber-50 px-3 py-0.5 rounded-full text-xs font-bold mb-4">威力無窮 · 破風衝刺</span>
+          </button>
+          <div class="bg-gradient-to-b from-amber-50 to-amber-100/50 rounded-2xl py-3 px-4 border border-amber-200/60">
+            <span class="text-xs text-amber-700 font-bold block mb-0.5">累積加油</span>
+            <span id="count-power" class="text-4xl md:text-5xl font-black text-amber-600 font-chakra tracking-tight block">0</span>
+          </div>
+        </div>
+
+        <!-- 3. 拍手卡片 -->
+        <div class="bg-white rounded-3xl p-6 md:p-8 text-center shadow-lg shadow-emerald-500/5 border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 relative group">
+          <button id="btn-clap" onclick="triggerCheer('clap', '👏', event)" class="cheer-btn w-full flex flex-col items-center focus:outline-none cursor-pointer">
+            <span class="text-7xl md:text-8xl mb-3 transform group-hover:scale-110 transition-transform select-none filter drop-shadow-sm">👏</span>
+            <span class="text-2xl md:text-3xl font-black text-slate-800 mb-1 tracking-wide">拍手</span>
+            <span class="text-emerald-700 bg-emerald-50 px-3 py-0.5 rounded-full text-xs font-bold mb-4">熱烈掌聲 · 完賽榮耀</span>
+          </button>
+          <div class="bg-gradient-to-b from-emerald-50 to-emerald-100/50 rounded-2xl py-3 px-4 border border-emerald-200/60">
+            <span class="text-xs text-emerald-700 font-bold block mb-0.5">累積拍手</span>
+            <span id="count-clap" class="text-4xl md:text-5xl font-black text-emerald-600 font-chakra tracking-tight block">0</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 分頁 2: 四極燈塔路線 (8大站點) -->
+    <div id="tab-content-lighthouses" class="hidden">
+      <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 md:p-8 mb-8">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+          <div>
+            <h2 class="text-xl font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-regular fa-compass text-blue-600"></i>
+              <span>2026 TBA 挑戰路線 (全程 615km)</span>
+            </h2>
+            <p class="text-xs md:text-sm text-slate-500">
+              139衝衝隊 挑戰極限路線檢錄站與補給點一覽
+            </p>
+          </div>
+        </div>
+
+        <!-- 完整文字流程 -->
+        <div class="bg-gradient-to-r from-blue-50 via-indigo-50 to-amber-50/60 p-4 md:p-5 rounded-2xl border border-blue-200/80 mb-6 shadow-xs">
+          <div class="text-xs font-black text-blue-700 mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-location-dot text-blue-600"></i>
+            <span>路線站點全程一覽：</span>
+          </div>
+          <p class="font-bold text-slate-800 text-xs sm:text-sm md:text-base leading-relaxed tracking-wide bg-white/70 p-3 rounded-xl border border-blue-100 font-mono">
+            新北福隆遊客中心0km → 新北富貴角燈塔檢錄站75km → 新竹市風情海岸 (檢+補)185km → 彰化王功福海宮 (檢+補)305km → 台南將軍吉安宮  (檢+補)405km → 台南國聖燈塔檢錄站425km → 屏東東港慈濟(檢+補)525km → 屏東墾丁海山露營區615km
+          </p>
+        </div>
+
+        <!-- 8 站詳細卡片 -->
+        <div id="stations-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+          <!-- JS 動態渲染 8 站 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 分頁 3: 打氣留言版 (大文字、清楚階層) -->
+    <div id="tab-content-shoutouts" class="hidden">
+      <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8 md:p-10 mb-8">
+        
+        <!-- 大標題 -->
+        <div class="mb-6">
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 flex items-center gap-3 mb-2.5 tracking-tight">
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0 shadow-xs">
+              <i class="fa-regular fa-comment-dots text-xl sm:text-2xl"></i>
+            </div>
+            <span>向 139衝衝隊 發送專屬加油話語！</span>
+          </h2>
+          <p class="text-sm sm:text-base md:text-lg text-slate-600 leading-relaxed font-normal">
+            留下你的名字或暱稱，輸入為騎手們打氣的話。送出後會<strong class="text-indigo-600 font-black">立即顯示在下方留言板與即時動態牆</strong>，並可一鍵複製至 LINE 群！
+          </p>
+        </div>
+
+        <!-- 輸入表單 -->
+        <form onsubmit="handleSendCustomMessage(event)" class="space-y-5 mb-8">
+          <!-- 中標題：你的暱稱 -->
+          <div>
+            <label class="block text-base sm:text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
+              <span>你的暱稱</span>
+              <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">選填</span>
+            </label>
+            <input type="text" id="input-sender" placeholder="例如：阿明、補給組長、139啦啦隊" class="w-full px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 transition-all" maxlength="20">
+          </div>
+
+          <!-- 中標題：加油激勵內容 -->
+          <div>
+            <label class="block text-base sm:text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
+              <span>加油激勵內容</span>
+              <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/50">必填</span>
+            </label>
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <input type="text" id="input-text" placeholder="寫下一句振奮人心的打氣..." class="flex-1 px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 transition-all" maxlength="60">
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-black px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl flex items-center justify-center gap-2 text-base sm:text-lg transition-all shadow-lg shadow-indigo-500/20 active:scale-95 cursor-pointer flex-shrink-0">
+                <i class="fa-solid fa-paper-plane text-base"></i>
+                <span>送出打氣</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 中標題：快速選擇激勵金句 -->
+          <div class="pt-2">
+            <div class="text-base sm:text-lg font-black text-slate-800 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+              <span>快速選擇激勵金句</span>
+              <span class="text-xs sm:text-sm font-normal text-slate-400">（點擊直接填入）：</span>
+            </div>
+            <div id="preset-buttons" class="flex flex-wrap gap-2.5">
+              <!-- JS 動態生成按鈕 -->
+            </div>
+          </div>
+        </form>
+
+        <!-- 即時隊友留言板 -->
+        <div class="mt-10 pt-7 border-t border-slate-100">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-2">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <i class="fa-regular fa-comment-dots text-base"></i>
+              </div>
+              <span>隊友即時打氣留言板</span>
+              <span id="custom-msg-count-badge" class="text-xs sm:text-sm bg-indigo-50 text-indigo-700 px-3 py-0.5 rounded-full font-bold border border-indigo-200/60">
+                共 0 則
+              </span>
+            </h3>
+            <span class="text-xs sm:text-sm text-emerald-700 font-bold flex items-center gap-1.5 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60 w-fit">
+              <i class="fa-regular fa-circle-check text-emerald-600"></i>
+              即時同步中
+            </span>
+          </div>
+
+          <div id="custom-messages-board" class="space-y-3.5 max-h-80 overflow-y-auto pr-1">
+            <!-- 留言卡片在此展示 -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 總火力輸出與即時動態牆 -->
+    <div class="bg-white rounded-3xl shadow-lg shadow-slate-200/60 p-6 md:p-8 border border-slate-100 mb-8">
+      <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-100 pb-6 mb-6 gap-4">
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-amber-500"></i>
+            <span>總火力輸出</span>
+          </h2>
+          <p class="text-xs md:text-sm text-slate-500 font-medium">
+            群組隊友累積應援總數 · 139衝衝隊集氣能量
+          </p>
+        </div>
+        <div class="text-center sm:text-right bg-indigo-50/70 px-6 py-3 rounded-2xl border border-indigo-100">
+          <span id="total-cheers-count" class="text-4xl sm:text-5xl font-black text-indigo-600 font-chakra tracking-tight">0</span>
+          <span class="text-slate-600 font-bold text-base sm:text-lg ml-2">次加油</span>
+        </div>
+      </div>
+
+      <!-- 動態牆篩選與列表 -->
+      <div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+          <h3 class="text-xs font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-line text-blue-500"></i>
+            最新應援動態牆 (即時更新)
+          </h3>
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button id="filter-btn-all" onclick="setWallFilter('all')" class="px-2.5 py-1 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs">
+              全部 (<span id="all-log-count">0</span>)
+            </button>
+            <button id="filter-btn-custom" onclick="setWallFilter('custom')" class="px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-500 hover:text-slate-800 flex items-center gap-1">
+              <span>💬 隊友留言</span>
+              <span id="custom-badge-pill" class="bg-indigo-100 text-indigo-700 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+            </button>
+            <button id="filter-btn-cheers" onclick="setWallFilter('cheers')" class="px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-500 hover:text-slate-800">
+              ⚡ 快速按鈕
+            </button>
+          </div>
+        </div>
+
+        <div id="activity-log" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-sm text-slate-700">
+          <!-- 動態紀錄 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 管理與分享功能區塊 -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-10">
+      <button onclick="shareStats()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-xl transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer active:scale-95">
+        <i class="fa-regular fa-copy"></i>
+        <span>複製加油戰報 (發到 LINE 群)</span>
+      </button>
+
+      <button onclick="shareToLine()" class="w-full sm:w-auto bg-[#06C755] hover:bg-[#05b34c] text-white font-bold py-3 px-5 rounded-2xl shadow-lg shadow-emerald-500/20 hover:shadow-xl transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer active:scale-95" title="直接開啟 LINE 分享至聊天室">
+        <i class="fa-brands fa-line text-lg"></i>
+        <span>LINE 一鍵傳送</span>
+      </button>
+
+      <button onclick="openResetModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold py-3 px-4 rounded-2xl transition-all text-sm flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95 border border-slate-200/70" title="重置加油數據">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span class="sm:hidden">重設數據</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="text-center py-6 text-slate-500 text-sm border-t border-slate-200/60 bg-white/60 backdrop-blur-sm">
+    <div class="container mx-auto px-4">
+      <p class="font-black text-slate-800 text-base flex items-center justify-center gap-1.5">
+        <span>🚴‍♂️</span>
+        <span>139衝衝隊</span>
+        <span>🚴‍♀️</span>
+      </p>
+      <p class="text-xs text-slate-500 mt-1 font-medium">
+        2026 TBA 四極燈塔 620 挑戰專屬加油站 · 一起勇敢踏動，破風挑戰極限！
+      </p>
+      <p class="text-[11px] text-slate-400 mt-1">
+        福隆0km ➔ 富貴角75km ➔ 風情海岸185km ➔ 王功305km ➔ 將軍405km ➔ 國聖燈塔425km ➔ 東港525km ➔ 墾丁海山615km
+      </p>
+    </div>
+  </footer>
+
+  <!-- 重置確認彈窗 Modal -->
+  <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center relative">
+      <button onclick="closeResetModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+      </div>
+      <h3 class="text-lg font-black text-slate-900 mb-2">確定重置加油數據？</h3>
+      <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+        重置後，目前的讚數、加油數、拍手數與動態牆將全數清零。此操作無法復原。
+      </p>
+      <div class="flex gap-3">
+        <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 cursor-pointer">
+          取消
+        </button>
+        <button onclick="confirmResetData()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-md cursor-pointer">
+          確認重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 訊息提示 -->
+  <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/95 text-white px-5 py-3 rounded-full text-xs sm:text-sm font-bold shadow-2xl z-50 flex items-center space-x-2 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none backdrop-blur-sm border border-slate-700">
+    <i class="fa-regular fa-circle-check text-emerald-400 flex-shrink-0"></i>
+    <span id="toast-msg" class="tracking-wide">提示訊息</span>
+  </div>
+
+  <script>
+    // 8 大路線站點
+    const ROUTE_STATIONS = [
+      { id: 's1', name: '新北福隆遊客中心', kmText: '0km', tag: '起點出發', type: 'start', targetCheer: 0 },
+      { id: 's2', name: '新北富貴角燈塔檢錄站', kmText: '75km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 60 },
+      { id: 's3', name: '新竹市風情海岸 (檢+補)', kmText: '185km', tag: '檢+補', type: 'supply', targetCheer: 150 },
+      { id: 's4', name: '彰化王功福海宮 (檢+補)', kmText: '305km', tag: '檢+補', type: 'supply', targetCheer: 250 },
+      { id: 's5', name: '台南將軍吉安宮  (檢+補)', kmText: '405km', tag: '檢+補', type: 'supply', targetCheer: 360 },
+      { id: 's6', name: '台南國聖燈塔檢錄站', kmText: '425km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 450 },
+      { id: 's7', name: '屏東東港慈濟(檢+補)', kmText: '525km', tag: '檢+補', type: 'supply', targetCheer: 540 },
+      { id: 's8', name: '屏東墾丁海山露營區', kmText: '615km', tag: '終點完賽', type: 'finish', targetCheer: 615 },
+    ];
+
+    // 激勵金句
+    const PRESET_MESSAGES = [
+      '139衝衝隊 無所畏懼！🔥',
+      '穩扎穩打，破風前進！🚴💨',
+      '落山風吹不倒我們！💪',
+      '大家平安完賽！',
+      '眼前的黑，不是黑！',
+      '芭豆腰，請靠腰！',
+      '騎到都瘦了!',
+      '終點冰可樂跟便當在等你們！🍱🥤',
+    ];
+
+    let counts = { like: 0, power: 0, clap: 0 };
+    let activities = [];
+    let soundEnabled = true;
+    let currentFilter = 'all';
+    let audioCtx = null;
+
+    // Web Audio 合成器
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'bell') {
+          [0, 0.1].forEach((delay) => {
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(2093, now + delay);
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(2489, now + delay);
+            gain.gain.setValueAtTime(0.18, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.35);
+            osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+            osc1.start(now + delay); osc2.start(now + delay);
+            osc1.stop(now + delay + 0.35); osc2.stop(now + delay + 0.35);
+          });
+        } else if (type === 'power') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.type = 'sawtooth'; osc2.type = 'triangle';
+          osc1.frequency.setValueAtTime(330, now);
+          osc1.frequency.exponentialRampToValueAtTime(660, now + 0.2);
+          osc2.frequency.setValueAtTime(440, now);
+          osc2.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+          osc1.start(now); osc2.start(now);
+          osc1.stop(now + 0.3); osc2.stop(now + 0.3);
+        } else if (type === 'clap') {
+          const bufferSize = ctx.sampleRate * 0.15;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1100, now);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+          noise.start(now); noise.stop(now + 0.15);
+        } else if (type === 'like') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523, now);
+          osc.frequency.exponentialRampToValueAtTime(1046, now + 0.12);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.18);
+        }
+      } catch(e) {}
+    }
+
+    // 初始化載入
+    function init() {
+      const savedCounts = localStorage.getItem('bike_cheer_data_2026');
+      if (savedCounts) {
+        try { counts = JSON.parse(savedCounts); } catch(e) {}
+      }
+
+      const savedLogs = localStorage.getItem('bike_cheer_logs_2026');
+      if (savedLogs) {
+        try { activities = JSON.parse(savedLogs); } catch(e) {}
+      } else {
+        activities = [{
+          id: 'init-1',
+          type: 'power',
+          sender: '後勤補給小組',
+          message: '水補給與香蕉已就位，139衝衝隊衝呀！',
+          emoji: '💪',
+          timeStr: '剛剛'
+        }];
+      }
+
+      const savedSound = localStorage.getItem('bike_cheer_sound_2026');
+      if (savedSound !== null) {
+        soundEnabled = savedSound === 'true';
+      }
+      updateSoundUI();
+      renderPresetButtons();
+      renderStations();
+      updateDisplay();
+    }
+
+    // 更新音效按鈕狀態
+    function updateSoundUI() {
+      const btn = document.getElementById('sound-btn');
+      const icon = document.getElementById('sound-icon');
+      if (soundEnabled) {
+        btn.className = 'p-2 rounded-full border bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all cursor-pointer';
+        icon.className = 'fa-solid fa-volume-high';
+      } else {
+        btn.className = 'p-2 rounded-full border bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200 transition-all cursor-pointer';
+        icon.className = 'fa-solid fa-volume-xmark';
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('bike_cheer_sound_2026', String(soundEnabled));
+      updateSoundUI();
+      if (soundEnabled) playSound('like');
+      showToast(soundEnabled ? '音效已開啟 🔊' : '音效已靜音 🔇');
+    }
+
+    // 切換分頁
+    function switchTab(tab) {
+      ['cheer', 'lighthouses', 'shoutouts'].forEach(t => {
+        const content = document.getElementById(`tab-content-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          content.classList.remove('hidden');
+          btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm';
+        } else {
+          content.classList.add('hidden');
+          btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
+        }
+      });
+    }
+
+    // 更新畫面顯示
+    function updateDisplay() {
+      document.getElementById('count-like').innerText = counts.like.toLocaleString();
+      document.getElementById('count-power').innerText = counts.power.toLocaleString();
+      document.getElementById('count-clap').innerText = counts.clap.toLocaleString();
+
+      const total = counts.like + counts.power + counts.clap;
+      document.getElementById('total-cheers-count').innerText = total.toLocaleString();
+
+      const percent = Math.min(100, Math.round((total / 615) * 100));
+      const reachedCount = ROUTE_STATIONS.filter(s => total >= s.targetCheer).length;
+
+      document.getElementById('gauge-station-text').innerText = `路線進度：已通過 ${reachedCount} / 8 站`;
+      document.getElementById('gauge-cheer-text').innerText = `${total.toLocaleString()} / 615 應援火力 (${percent}%)`;
+      document.getElementById('gauge-bar').style.width = `${Math.max(5, percent)}%`;
+
+      renderCustomMessagesBoard();
+      renderActivityLog();
+      renderStations();
+    }
+
+    function saveData() {
+      localStorage.setItem('bike_cheer_data_2026', JSON.stringify(counts));
+      localStorage.setItem('bike_cheer_logs_2026', JSON.stringify(activities));
+    }
+
+    // 點擊加油
+    function triggerCheer(type, emoji, event) {
+      if (navigator.vibrate) navigator.vibrate(20);
+      playSound(type);
+      createFloatingEmoji(emoji, event);
+
+      counts[type]++;
+      saveData();
+      updateDisplay();
+
+      // 數字動畫
+      const countEl = document.getElementById(`count-${type}`);
+      countEl.classList.remove('count-pop');
+      void countEl.offsetWidth;
+      countEl.classList.add('count-pop');
+
+      const total = counts.like + counts.power + counts.clap;
+      if ([50, 100, 200, 300, 450, 615].includes(total) || total % 250 === 0) {
+        if (window.confetti) {
+          confetti({ particleCount: 75, spread: 65, origin: { y: 0.6 } });
+        }
+        showToast(`🎉 太狂了！139衝衝隊累積火力突破 ${total} 次！`);
+      }
+
+      const names = { like: '讚爆全場', power: '熱血肌肉', clap: '掌聲喝采' };
+      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      
+      activities.unshift({
+        id: Date.now().toString(),
+        type,
+        emoji,
+        timeStr,
+        message: `送出了 1 個【${names[type]}】！`
+      });
+      if (activities.length > 50) activities.pop();
+      saveData();
+      updateDisplay();
+    }
+
+    // 車鈴聲
+    function triggerBicycleBell(event) {
+      if (navigator.vibrate) navigator.vibrate(25);
+      playSound('bell');
+      createFloatingEmoji('🔔', event);
+      createFloatingEmoji('🚴', event);
+
+      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      activities.unshift({
+        id: Date.now().toString(),
+        type: 'bell',
+        emoji: '🔔',
+        timeStr,
+        message: '響起了響亮的加油車鈴：叮叮！叮叮！🚴💨'
+      });
+      if (activities.length > 50) activities.pop();
+      saveData();
+      updateDisplay();
+      showToast('叮叮！車鈴響起，衝衝隊全速前進！');
+    }
+
+    // 發送自訂留言
+    function handleSendCustomMessage(e) {
+      e.preventDefault();
+      const inputSender = document.getElementById('input-sender');
+      const inputText = document.getElementById('input-text');
+      const text = inputText.value.trim();
+      if (!text) return;
+
+      if (navigator.vibrate) navigator.vibrate(20);
+      playSound('power');
+      createFloatingEmoji('💬');
+
+      const senderName = inputSender.value.trim() || '熱血隊友';
+      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+      counts.power++; // 發送留言貢獻 +1 火力
+      activities.unshift({
+        id: Date.now().toString(),
+        type: 'custom',
+        sender: senderName,
+        message: text,
+        emoji: '💬',
+        timeStr
+      });
+      if (activities.length > 50) activities.pop();
+
+      saveData();
+      inputText.value = '';
+      updateDisplay();
+      showToast('✅ 加油喊話已送出！已同步顯示於下方「留言板」與「動態牆」');
+    }
+
+    // 漂浮 Emoji
+    function createFloatingEmoji(emoji, e) {
+      let x = window.innerWidth / 2;
+      let y = window.innerHeight / 2;
+      if (e && e.currentTarget) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        x = rect.left + rect.width / 2 + (Math.random() - 0.5) * 60;
+        y = rect.top + window.scrollY;
+      }
+      const el = document.createElement('div');
+      el.className = 'floating-emoji';
+      el.innerText = emoji;
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }
+
+    // 渲染激勵金句按鈕
+    function renderPresetButtons() {
+      const container = document.getElementById('preset-buttons');
+      container.innerHTML = PRESET_MESSAGES.map(msg => `
+        <button type="button" onclick="fillPreset('${msg}')" class="text-sm sm:text-base font-bold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 text-slate-700 px-3.5 sm:px-4 py-2 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-xs active:scale-95">
+          ${msg}
+        </button>
+      `).join('');
+    }
+
+    function fillPreset(text) {
+      document.getElementById('input-text').value = text;
+    }
+
+    // 渲染 8 大站點卡片
+    function renderStations() {
+      const container = document.getElementById('stations-grid');
+      const total = counts.like + counts.power + counts.clap;
+
+      container.innerHTML = ROUTE_STATIONS.map((st, idx) => {
+        const isUnlocked = total >= st.targetCheer;
+        const tagColor = st.type === 'start' ? 'bg-blue-100 text-blue-800' :
+                         st.type === 'finish' ? 'bg-amber-100 text-amber-800' :
+                         isUnlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200/80 text-slate-600';
+
+        return `
+          <div class="p-4 rounded-2xl border transition-all ${isUnlocked ? 'bg-blue-50/50 border-blue-200 shadow-xs' : 'bg-slate-50 border-slate-200/70'}">
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] font-black flex items-center justify-center font-chakra">
+                0${idx + 1}
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${tagColor}">
+                ${st.tag}
+              </span>
+            </div>
+            <h3 class="font-black text-slate-900 text-sm mb-1 leading-snug">
+              ${st.name}
+            </h3>
+            <div class="flex items-center justify-between text-xs font-bold text-blue-600 font-chakra mt-3 pt-2 border-t border-slate-200/60">
+              <span class="text-slate-400 font-normal">站點里程</span>
+              <span class="font-bold">${st.kmText}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染留言板
+    function renderCustomMessagesBoard() {
+      const container = document.getElementById('custom-messages-board');
+      const badge = document.getElementById('custom-msg-count-badge');
+      const customMsgs = activities.filter(a => a.type === 'custom');
+
+      badge.innerText = `共 ${customMsgs.length} 則`;
+
+      if (customMsgs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-6">
+            <p class="font-black text-slate-700 text-base sm:text-lg mb-1.5">目前還沒有留言</p>
+            <p class="text-sm sm:text-base text-slate-500">在上方輸入內容並點擊「送出打氣」，留言就會立即出現在這裡與下方動態牆！</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = customMsgs.map(item => `
+        <div class="bg-gradient-to-r from-indigo-50/70 via-white to-blue-50/50 p-4 sm:p-5 rounded-2xl border border-indigo-100 shadow-sm transition-all hover:shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-xs">
+                ${item.sender ? item.sender.charAt(0) : '友'}
+              </span>
+              <span class="font-black text-indigo-950 text-base sm:text-lg">
+                ${item.sender || '熱血隊友'}
+              </span>
+              <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md">
+                139衝衝隊應援
+              </span>
+            </div>
+            <span class="text-xs sm:text-sm text-slate-400 font-chakra font-medium">
+              ${item.timeStr}
+            </span>
+          </div>
+          <p class="text-base sm:text-lg md:text-xl font-bold text-slate-900 pl-10 sm:pl-11 leading-relaxed">
+            「${item.message}」
+          </p>
+        </div>
+      `).join('');
+    }
+
+    // 渲染動態牆
+    function setWallFilter(filter) {
+      currentFilter = filter;
+      ['all', 'custom', 'cheers'].forEach(f => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (f === filter) {
+          btn.className = `px-2.5 py-1 rounded-lg transition-all cursor-pointer bg-white ${f === 'custom' ? 'text-indigo-600' : f === 'cheers' ? 'text-emerald-600' : 'text-blue-600'} shadow-xs`;
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-500 hover:text-slate-800';
+        }
+      });
+      renderActivityLog();
+    }
+
+    function renderActivityLog() {
+      const container = document.getElementById('activity-log');
+      const allCount = document.getElementById('all-log-count');
+      const customBadge = document.getElementById('custom-badge-pill');
+      const customMsgs = activities.filter(a => a.type === 'custom');
+
+      allCount.innerText = activities.length;
+      customBadge.innerText = customMsgs.length;
+
+      const filtered = activities.filter(item => {
+        if (currentFilter === 'custom') return item.type === 'custom';
+        if (currentFilter === 'cheers') return item.type !== 'custom';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center text-slate-400 py-6 italic text-sm">點擊上方按鈕，成為第一個發送應援的人！</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const isCustom = item.type === 'custom';
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl border transition-all ${isCustom ? 'bg-gradient-to-r from-indigo-50/80 to-blue-50/40 border-indigo-200/90 shadow-xs' : 'bg-slate-50 hover:bg-blue-50/40 border-slate-100'}">
+            <div class="flex items-center space-x-2.5 overflow-hidden">
+              <span class="text-xl select-none flex-shrink-0">${item.emoji}</span>
+              <div class="truncate">
+                ${isCustom ? `
+                  <div class="flex items-center gap-2">
+                    <span class="font-black text-indigo-700 text-xs sm:text-sm bg-indigo-100 px-2 py-0.5 rounded-md flex-shrink-0">
+                      ${item.sender || '隊友'} 留言
+                    </span>
+                    <span class="font-bold text-slate-900 text-sm sm:text-base truncate">
+                      「${item.message}」
+                    </span>
+                  </div>
+                ` : `
+                  <div>
+                    ${item.sender ? `<span class="font-black text-indigo-600 mr-1.5 text-xs bg-indigo-50 px-2 py-0.5 rounded-md">${item.sender}</span>` : ''}
+                    <span class="font-bold text-slate-800 text-xs sm:text-sm">${item.message}</span>
+                  </div>
+                `}
+              </div>
+            </div>
+            <span class="text-[11px] text-slate-400 font-chakra font-medium ml-2 flex-shrink-0">${item.timeStr}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // LINE 分享文字生成
+    function generateShareReport() {
+      const timeNow = new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const total = counts.like + counts.power + counts.clap;
+      const percent = Math.min(100, Math.round((total / 615) * 100));
+      const customMsgs = activities.filter(a => a.type === 'custom');
+      const recentShoutouts = customMsgs.slice(0, 3).map(m => `「${m.sender || '隊友'}」：${m.message}`);
+
+      let text = `🚴‍♂️【2026 TBA 四極燈塔 620 挑戰 - 139衝衝隊應援戰報】🔥\n` +
+                 `⏱ 戰報時間：${timeNow}\n\n` +
+                 `👍 按讚數：${counts.like.toLocaleString()}\n` +
+                 `💪 加油數：${counts.power.toLocaleString()}\n` +
+                 `👏 拍手數：${counts.clap.toLocaleString()}\n` +
+                 `⚡ 總火力輸出：${total.toLocaleString()} 次！\n` +
+                 `🏁 挑戰完成度：${percent}% (615KM 征途)\n` +
+                 `📍 路線：新北福隆0km → 富貴角75km → 風情海岸185km → 王功305km → 將軍405km → 國聖燈塔425km → 東港525km → 墾丁海山615km\n`;
+
+      if (recentShoutouts.length > 0) {
+        text += `\n💬 隊友最新熱血喊話：\n${recentShoutouts.join('\n')}\n`;
+      }
+
+      text += `\n「踏動每一轉踏板，615KM 征途我們來了！」\n隊友們頂住！全員平安完賽！🚴💨🔥`;
+      return text;
+    }
+
+    function shareStats() {
+      const text = generateShareReport();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('應援戰報已複製！快貼到 139衝衝隊 LINE 群發送吧 🚀');
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('應援戰報已複製！快發到 LINE 群 🚀');
+    }
+
+    function shareToLine() {
+      const text = generateShareReport();
+      window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // Modal 重置
+    function openResetModal() {
+      document.getElementById('reset-modal').classList.remove('hidden');
+    }
+    function closeResetModal() {
+      document.getElementById('reset-modal').classList.add('hidden');
+    }
+    function confirmResetData() {
+      counts = { like: 0, power: 0, clap: 0 };
+      activities = [{
+        id: Date.now().toString(),
+        type: 'bell',
+        emoji: '🔄',
+        sender: '系統',
+        message: '加油數據已重新出發，再接再厲！',
+        timeStr: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+      }];
+      saveData();
+      updateDisplay();
+      closeResetModal();
+      showToast('加油計數已成功重置！');
+    }
+
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+      }, 2800);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
