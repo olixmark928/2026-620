@@ -441,557 +441,526 @@
   </div>
 
   <script>
-    // 8 大路線站點
-    const ROUTE_STATIONS = [
-      { id: 's1', name: '新北福隆遊客中心', kmText: '0km', tag: '起點出發', type: 'start', targetCheer: 0 },
-      { id: 's2', name: '新北富貴角燈塔檢錄站', kmText: '75km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 60 },
-      { id: 's3', name: '新竹市風情海岸 (檢+補)', kmText: '185km', tag: '檢+補', type: 'supply', targetCheer: 150 },
-      { id: 's4', name: '彰化王功福海宮 (檢+補)', kmText: '305km', tag: '檢+補', type: 'supply', targetCheer: 250 },
-      { id: 's5', name: '台南將軍吉安宮  (檢+補)', kmText: '405km', tag: '檢+補', type: 'supply', targetCheer: 360 },
-      { id: 's6', name: '台南國聖燈塔檢錄站', kmText: '425km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 450 },
-      { id: 's7', name: '屏東東港慈濟(檢+補)', kmText: '525km', tag: '檢+補', type: 'supply', targetCheer: 540 },
-      { id: 's8', name: '屏東墾丁海山露營區', kmText: '615km', tag: '終點完賽', type: 'finish', targetCheer: 615 },
-    ];
+  const BIN_ID = "6aec1889ac6210605a6e0fc8";
+  const API_KEY = "$2a$10$UT72zPc4yIm743yyZ6Xu/.qS4DkBXKZezTV43EJT6IaMChhxZcxRS";
+  const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-    // 激勵金句
-    const PRESET_MESSAGES = [
-      '139衝衝隊 無所畏懼！🔥',
-      '穩扎穩打，破風前進！🚴💨',
-      '落山風吹不倒我們！💪',
-      '大家平安完賽！',
-      '眼前的黑，不是黑！',
-      '芭豆腰，請靠腰！',
-      '騎到都瘦了!',
-      '終點冰可樂跟便當在等你們！🍱🥤',
-    ];
+  // 8 大路線站點
+  const ROUTE_STATIONS = [
+    { id: 's1', name: '新北福隆遊客中心', kmText: '0km', tag: '起點出發', type: 'start', targetCheer: 0 },
+    { id: 's2', name: '新北富貴角燈塔檢錄站', kmText: '75km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 60 },
+    { id: 's3', name: '新竹市風情海岸 (檢+補)', kmText: '185km', tag: '檢+補', type: 'supply', targetCheer: 150 },
+    { id: 's4', name: '彰化王功福海宮 (檢+補)', kmText: '305km', tag: '檢+補', type: 'supply', targetCheer: 250 },
+    { id: 's5', name: '台南將軍吉安宮  (檢+補)', kmText: '405km', tag: '檢+補', type: 'supply', targetCheer: 360 },
+    { id: 's6', name: '台南國聖燈塔檢錄站', kmText: '425km', tag: '燈塔檢錄站', type: 'checkpoint', targetCheer: 450 },
+    { id: 's7', name: '屏東東港慈濟(檢+補)', kmText: '525km', tag: '檢+補', type: 'supply', targetCheer: 540 },
+    { id: 's8', name: '屏東墾丁海山露營區', kmText: '615km', tag: '終點完賽', type: 'finish', targetCheer: 615 },
+  ];
 
-    let counts = { like: 0, power: 0, clap: 0 };
-    let activities = [];
-    let soundEnabled = true;
-    let currentFilter = 'all';
-    let audioCtx = null;
+  // 激勵金句
+  const PRESET_MESSAGES = [
+    '139衝衝隊 無所畏懼！🔥',
+    '穩扎穩打，破風前進！🚴💨',
+    '落山風吹不倒我們！💪',
+    '大家平安完賽！',
+    '眼前的黑，不是黑！',
+    '芭豆腰，請靠腰！',
+    '騎到都瘦了!',
+    '終點冰可樂跟便當在等你們！🍱🥤',
+  ];
 
-    // Web Audio 合成器
-    function getAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtx = new AudioContextClass();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-      return audioCtx;
+  let counts = { like: 0, power: 0, clap: 0 };
+  let activities = [];
+  let soundEnabled = true;
+  let currentFilter = 'all';
+  let audioCtx = null;
+
+  // Web Audio 合成器
+  function getAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) audioCtx = new AudioContextClass();
     }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  }
 
-    function playSound(type) {
-      if (!soundEnabled) return;
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const now = ctx.currentTime;
+  function playSound(type) {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
 
-        if (type === 'bell') {
-          [0, 0.1].forEach((delay) => {
-            const osc1 = ctx.createOscillator();
-            const osc2 = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(2093, now + delay);
-            osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(2489, now + delay);
-            gain.gain.setValueAtTime(0.18, now + delay);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.35);
-            osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
-            osc1.start(now + delay); osc2.start(now + delay);
-            osc1.stop(now + delay + 0.35); osc2.stop(now + delay + 0.35);
-          });
-        } else if (type === 'power') {
+      if (type === 'bell') {
+        [0, 0.1].forEach((delay) => {
           const osc1 = ctx.createOscillator();
           const osc2 = ctx.createOscillator();
           const gain = ctx.createGain();
-          osc1.type = 'sawtooth'; osc2.type = 'triangle';
-          osc1.frequency.setValueAtTime(330, now);
-          osc1.frequency.exponentialRampToValueAtTime(660, now + 0.2);
-          osc2.frequency.setValueAtTime(440, now);
-          osc2.frequency.exponentialRampToValueAtTime(880, now + 0.2);
-          gain.gain.setValueAtTime(0.15, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(2093, now + delay);
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(2489, now + delay);
+          gain.gain.setValueAtTime(0.18, now + delay);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.35);
           osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
-          osc1.start(now); osc2.start(now);
-          osc1.stop(now + 0.3); osc2.stop(now + 0.3);
-        } else if (type === 'clap') {
-          const bufferSize = ctx.sampleRate * 0.15;
-          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-          const noise = ctx.createBufferSource();
-          noise.buffer = buffer;
-          const filter = ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(1100, now);
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-          noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-          noise.start(now); noise.stop(now + 0.15);
-        } else if (type === 'like') {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523, now);
-          osc.frequency.exponentialRampToValueAtTime(1046, now + 0.12);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-          osc.connect(gain); gain.connect(ctx.destination);
-          osc.start(now); osc.stop(now + 0.18);
-        }
-      } catch(e) {}
+          osc1.start(now + delay); osc2.start(now + delay);
+          osc1.stop(now + delay + 0.35); osc2.stop(now + delay + 0.35);
+        });
+      } else if (type === 'power') {
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.type = 'sawtooth'; osc2.type = 'triangle';
+        osc1.frequency.setValueAtTime(330, now);
+        osc1.frequency.exponentialRampToValueAtTime(660, now + 0.2);
+        osc2.frequency.setValueAtTime(440, now);
+        osc2.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+        osc1.start(now); osc2.start(now);
+        osc1.stop(now + 0.3); osc2.stop(now + 0.3);
+      } else if (type === 'clap') {
+        const bufferSize = ctx.sampleRate * 0.15;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1100, now);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        noise.start(now); noise.stop(now + 0.15);
+      } else if (type === 'like') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.exponentialRampToValueAtTime(1046, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.18);
+      }
+    } catch(e) {}
+  }
+
+  // 1. 從雲端讀取按讚數
+  async function fetchCloudData() {
+    try {
+      const response = await fetch(JSONBIN_URL, {
+        headers: { "X-Master-Key": API_KEY }
+      });
+      const data = await response.json();
+      if (data.record) {
+        counts = data.record;
+      }
+      updateDisplay();
+    } catch (error) {
+      console.error("讀取雲端資料失敗", error);
+    }
+  }
+
+  // 2. 同步資料到雲端
+  async function saveCloudData() {
+    try {
+      await fetch(JSONBIN_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": API_KEY
+        },
+        body: JSON.stringify(counts)
+      });
+    } catch (error) {
+      console.error("同步至雲端失敗", error);
+    }
+  }
+
+  // 初始化載入
+  function init() {
+    fetchCloudData(); // 改為從雲端抓取
+
+    const savedLogs = localStorage.getItem('bike_cheer_logs_2026');
+    if (savedLogs) {
+      try { activities = JSON.parse(savedLogs); } catch(e) {}
+    } else {
+      activities = [{
+        id: 'init-1',
+        type: 'power',
+        sender: '後勤補給小組',
+        message: '水補給與香蕉已就位，139衝衝隊衝呀！',
+        emoji: '💪',
+        timeStr: '剛剛'
+      }];
     }
 
-    // 初始化載入
-    function init() {
-      const savedCounts = localStorage.getItem('bike_cheer_data_2026');
-      if (savedCounts) {
-        try { counts = JSON.parse(savedCounts); } catch(e) {}
-      }
+    const savedSound = localStorage.getItem('bike_cheer_sound_2026');
+    if (savedSound !== null) {
+      soundEnabled = savedSound === 'true';
+    }
+    updateSoundUI();
+    renderPresetButtons();
+    renderStations();
+  }
 
-      const savedLogs = localStorage.getItem('bike_cheer_logs_2026');
-      if (savedLogs) {
-        try { activities = JSON.parse(savedLogs); } catch(e) {}
+  // 更新音效按鈕狀態
+  function updateSoundUI() {
+    const btn = document.getElementById('sound-btn');
+    const icon = document.getElementById('sound-icon');
+    if (soundEnabled) {
+      btn.className = 'p-2 rounded-full border bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all cursor-pointer';
+      icon.className = 'fa-solid fa-volume-high';
+    } else {
+      btn.className = 'p-2 rounded-full border bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200 transition-all cursor-pointer';
+      icon.className = 'fa-solid fa-volume-xmark';
+    }
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('bike_cheer_sound_2026', String(soundEnabled));
+    updateSoundUI();
+    if (soundEnabled) playSound('like');
+    showToast(soundEnabled ? '音效已開啟 🔊' : '音效已靜音 🔇');
+  }
+
+  // 切換分頁
+  function switchTab(tab) {
+    ['cheer', 'lighthouses', 'shoutouts'].forEach(t => {
+      const content = document.getElementById(`tab-content-${t}`);
+      const btn = document.getElementById(`tab-btn-${t}`);
+      if (t === tab) {
+        content.classList.remove('hidden');
+        btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm';
       } else {
-        activities = [{
-          id: 'init-1',
-          type: 'power',
-          sender: '後勤補給小組',
-          message: '水補給與香蕉已就位，139衝衝隊衝呀！',
-          emoji: '💪',
-          timeStr: '剛剛'
-        }];
+        content.classList.add('hidden');
+        btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
       }
+    });
+  }
 
-      const savedSound = localStorage.getItem('bike_cheer_sound_2026');
-      if (savedSound !== null) {
-        soundEnabled = savedSound === 'true';
-      }
-      updateSoundUI();
-      renderPresetButtons();
-      renderStations();
-      updateDisplay();
+  // 更新畫面顯示
+  function updateDisplay() {
+    document.getElementById('count-like').innerText = counts.like.toLocaleString();
+    document.getElementById('count-power').innerText = counts.power.toLocaleString();
+    document.getElementById('count-clap').innerText = counts.clap.toLocaleString();
+
+    const total = counts.like + counts.power + counts.clap;
+    document.getElementById('total-cheers-count').innerText = total.toLocaleString();
+
+    const percent = Math.min(100, Math.round((total / 615) * 100));
+    const reachedCount = ROUTE_STATIONS.filter(s => total >= s.targetCheer).length;
+
+    document.getElementById('gauge-station-text').innerText = `路線進度：已通過 ${reachedCount} / 8 站`;
+    document.getElementById('gauge-cheer-text').innerText = `${total.toLocaleString()} / 615 應援火力 (${percent}%)`;
+    document.getElementById('gauge-bar').style.width = `${Math.max(5, percent)}%`;
+
+    renderCustomMessagesBoard();
+    renderActivityLog();
+    renderStations();
+  }
+
+  // 儲存資料（改為同步至雲端）
+  function saveData() {
+    saveCloudData();
+    localStorage.setItem('bike_cheer_logs_2026', JSON.stringify(activities));
+  }
+
+  // 觸發加油按鈕
+  function triggerCheer(type, emoji, event) {
+    counts[type]++;
+    playSound(type);
+    saveData();
+    updateDisplay();
+    triggerFloatingEmoji(emoji, event);
+    triggerButtonPop(type);
+  }
+
+  function triggerButtonPop(type) {
+    const map = { like: 'btn-like', power: 'btn-power', clap: 'btn-clap' };
+    const el = document.getElementById(map[type]);
+    if (el) {
+      el.classList.add('count-pop');
+      setTimeout(() => el.classList.remove('count-pop'), 350);
     }
+  }
 
-    // 更新音效按鈕狀態
-    function updateSoundUI() {
-      const btn = document.getElementById('sound-btn');
-      const icon = document.getElementById('sound-icon');
-      if (soundEnabled) {
-        btn.className = 'p-2 rounded-full border bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 transition-all cursor-pointer';
-        icon.className = 'fa-solid fa-volume-high';
-      } else {
-        btn.className = 'p-2 rounded-full border bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200 transition-all cursor-pointer';
-        icon.className = 'fa-solid fa-volume-xmark';
-      }
+  function triggerFloatingEmoji(emoji, event) {
+    const el = document.createElement('div');
+    el.className = 'floating-emoji';
+    el.innerText = emoji;
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    if (event && event.clientX) {
+      x = event.clientX;
+      y = event.clientY;
     }
+    el.style.left = `${x - 24}px`;
+    el.style.top = `${y - 24}px`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
 
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      localStorage.setItem('bike_cheer_sound_2026', String(soundEnabled));
-      updateSoundUI();
-      if (soundEnabled) playSound('like');
-      showToast(soundEnabled ? '音效已開啟 🔊' : '音效已靜音 🔇');
+    if (Math.random() > 0.6 && typeof confetti === 'function') {
+      confetti({ particleCount: 15, spread: 50, origin: { x: x / window.innerWidth, y: y / window.innerHeight } });
     }
+  }
 
-    // 切換分頁
-    function switchTab(tab) {
-      ['cheer', 'lighthouses', 'shoutouts'].forEach(t => {
-        const content = document.getElementById(`tab-content-${t}`);
-        const btn = document.getElementById(`tab-btn-${t}`);
-        if (t === tab) {
-          content.classList.remove('hidden');
-          btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm';
-        } else {
-          content.classList.add('hidden');
-          btn.className = 'flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900';
-        }
-      });
-    }
+  // 車鈴
+  function triggerBicycleBell(event) {
+    playSound('bell');
+    triggerFloatingEmoji('🔔', event);
+    showToast('叮叮！為 139衝衝隊 敲響車鈴！🚲');
+  }
 
-    // 更新畫面顯示
-    function updateDisplay() {
-      document.getElementById('count-like').innerText = counts.like.toLocaleString();
-      document.getElementById('count-power').innerText = counts.power.toLocaleString();
-      document.getElementById('count-clap').innerText = counts.clap.toLocaleString();
+  // 渲染 8 大站點
+  function renderStations() {
+    const grid = document.getElementById('stations-grid');
+    if (!grid) return;
+    const total = counts.like + counts.power + counts.clap;
 
-      const total = counts.like + counts.power + counts.clap;
-      document.getElementById('total-cheers-count').innerText = total.toLocaleString();
+    grid.innerHTML = ROUTE_STATIONS.map((st, idx) => {
+      const passed = total >= st.targetCheer;
+      let badgeColor = passed ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200';
+      let cardBorder = passed ? 'border-emerald-300 bg-emerald-50/30 shadow-sm' : 'border-slate-100 bg-white';
 
-      const percent = Math.min(100, Math.round((total / 615) * 100));
-      const reachedCount = ROUTE_STATIONS.filter(s => total >= s.targetCheer).length;
-
-      document.getElementById('gauge-station-text').innerText = `路線進度：已通過 ${reachedCount} / 8 站`;
-      document.getElementById('gauge-cheer-text').innerText = `${total.toLocaleString()} / 615 應援火力 (${percent}%)`;
-      document.getElementById('gauge-bar').style.width = `${Math.max(5, percent)}%`;
-
-      renderCustomMessagesBoard();
-      renderActivityLog();
-      renderStations();
-    }
-
-    function saveData() {
-      localStorage.setItem('bike_cheer_data_2026', JSON.stringify(counts));
-      localStorage.setItem('bike_cheer_logs_2026', JSON.stringify(activities));
-    }
-
-    // 點擊加油
-    function triggerCheer(type, emoji, event) {
-      if (navigator.vibrate) navigator.vibrate(20);
-      playSound(type);
-      createFloatingEmoji(emoji, event);
-
-      counts[type]++;
-      saveData();
-      updateDisplay();
-
-      // 數字動畫
-      const countEl = document.getElementById(`count-${type}`);
-      countEl.classList.remove('count-pop');
-      void countEl.offsetWidth;
-      countEl.classList.add('count-pop');
-
-      const total = counts.like + counts.power + counts.clap;
-      if ([50, 100, 200, 300, 450, 615].includes(total) || total % 250 === 0) {
-        if (window.confetti) {
-          confetti({ particleCount: 75, spread: 65, origin: { y: 0.6 } });
-        }
-        showToast(`🎉 太狂了！139衝衝隊累積火力突破 ${total} 次！`);
-      }
-
-      const names = { like: '讚爆全場', power: '熱血肌肉', clap: '掌聲喝采' };
-      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      
-      activities.unshift({
-        id: Date.now().toString(),
-        type,
-        emoji,
-        timeStr,
-        message: `送出了 1 個【${names[type]}】！`
-      });
-      if (activities.length > 50) activities.pop();
-      saveData();
-      updateDisplay();
-    }
-
-    // 車鈴聲
-    function triggerBicycleBell(event) {
-      if (navigator.vibrate) navigator.vibrate(25);
-      playSound('bell');
-      createFloatingEmoji('🔔', event);
-      createFloatingEmoji('🚴', event);
-
-      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      activities.unshift({
-        id: Date.now().toString(),
-        type: 'bell',
-        emoji: '🔔',
-        timeStr,
-        message: '響起了響亮的加油車鈴：叮叮！叮叮！🚴💨'
-      });
-      if (activities.length > 50) activities.pop();
-      saveData();
-      updateDisplay();
-      showToast('叮叮！車鈴響起，衝衝隊全速前進！');
-    }
-
-    // 發送自訂留言
-    function handleSendCustomMessage(e) {
-      e.preventDefault();
-      const inputSender = document.getElementById('input-sender');
-      const inputText = document.getElementById('input-text');
-      const text = inputText.value.trim();
-      if (!text) return;
-
-      if (navigator.vibrate) navigator.vibrate(20);
-      playSound('power');
-      createFloatingEmoji('💬');
-
-      const senderName = inputSender.value.trim() || '熱血隊友';
-      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-
-      counts.power++; // 發送留言貢獻 +1 火力
-      activities.unshift({
-        id: Date.now().toString(),
-        type: 'custom',
-        sender: senderName,
-        message: text,
-        emoji: '💬',
-        timeStr
-      });
-      if (activities.length > 50) activities.pop();
-
-      saveData();
-      inputText.value = '';
-      updateDisplay();
-      showToast('✅ 加油喊話已送出！已同步顯示於下方「留言板」與「動態牆」');
-    }
-
-    // 漂浮 Emoji
-    function createFloatingEmoji(emoji, e) {
-      let x = window.innerWidth / 2;
-      let y = window.innerHeight / 2;
-      if (e && e.currentTarget) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        x = rect.left + rect.width / 2 + (Math.random() - 0.5) * 60;
-        y = rect.top + window.scrollY;
-      }
-      const el = document.createElement('div');
-      el.className = 'floating-emoji';
-      el.innerText = emoji;
-      el.style.left = `${x}px`;
-      el.style.top = `${y}px`;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1200);
-    }
-
-    // 渲染激勵金句按鈕
-    function renderPresetButtons() {
-      const container = document.getElementById('preset-buttons');
-      container.innerHTML = PRESET_MESSAGES.map(msg => `
-        <button type="button" onclick="fillPreset('${msg}')" class="text-sm sm:text-base font-bold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 text-slate-700 px-3.5 sm:px-4 py-2 rounded-xl border border-slate-200 transition-all cursor-pointer shadow-xs active:scale-95">
-          ${msg}
-        </button>
-      `).join('');
-    }
-
-    function fillPreset(text) {
-      document.getElementById('input-text').value = text;
-    }
-
-    // 渲染 8 大站點卡片
-    function renderStations() {
-      const container = document.getElementById('stations-grid');
-      const total = counts.like + counts.power + counts.clap;
-
-      container.innerHTML = ROUTE_STATIONS.map((st, idx) => {
-        const isUnlocked = total >= st.targetCheer;
-        const tagColor = st.type === 'start' ? 'bg-blue-100 text-blue-800' :
-                         st.type === 'finish' ? 'bg-amber-100 text-amber-800' :
-                         isUnlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200/80 text-slate-600';
-
-        return `
-          <div class="p-4 rounded-2xl border transition-all ${isUnlocked ? 'bg-blue-50/50 border-blue-200 shadow-xs' : 'bg-slate-50 border-slate-200/70'}">
+      return `
+        <div class="rounded-2xl p-4 border ${cardBorder} flex flex-col justify-between transition-all">
+          <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] font-black flex items-center justify-center font-chakra">
-                0${idx + 1}
-              </span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${tagColor}">
+              <span class="text-xs font-black px-2.5 py-0.5 rounded-full border ${badgeColor}">
                 ${st.tag}
               </span>
+              <span class="text-xs font-chakra font-bold text-slate-400">#${idx + 1}</span>
             </div>
-            <h3 class="font-black text-slate-900 text-sm mb-1 leading-snug">
-              ${st.name}
-            </h3>
-            <div class="flex items-center justify-between text-xs font-bold text-blue-600 font-chakra mt-3 pt-2 border-t border-slate-200/60">
-              <span class="text-slate-400 font-normal">站點里程</span>
-              <span class="font-bold">${st.kmText}</span>
-            </div>
+            <h4 class="font-black text-slate-900 text-sm sm:text-base mb-1">${st.name}</h4>
+            <p class="text-xs font-chakra font-bold text-blue-600 mb-2">${st.kmText}</p>
           </div>
-        `;
-      }).join('');
-    }
-
-    // 渲染留言板
-    function renderCustomMessagesBoard() {
-      const container = document.getElementById('custom-messages-board');
-      const badge = document.getElementById('custom-msg-count-badge');
-      const customMsgs = activities.filter(a => a.type === 'custom');
-
-      badge.innerText = `共 ${customMsgs.length} 則`;
-
-      if (customMsgs.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-6">
-            <p class="font-black text-slate-700 text-base sm:text-lg mb-1.5">目前還沒有留言</p>
-            <p class="text-sm sm:text-base text-slate-500">在上方輸入內容並點擊「送出打氣」，留言就會立即出現在這裡與下方動態牆！</p>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = customMsgs.map(item => `
-        <div class="bg-gradient-to-r from-indigo-50/70 via-white to-blue-50/50 p-4 sm:p-5 rounded-2xl border border-indigo-100 shadow-sm transition-all hover:shadow-md">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2.5">
-              <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-xs">
-                ${item.sender ? item.sender.charAt(0) : '友'}
-              </span>
-              <span class="font-black text-indigo-950 text-base sm:text-lg">
-                ${item.sender || '熱血隊友'}
-              </span>
-              <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md">
-                139衝衝隊應援
-              </span>
-            </div>
-            <span class="text-xs sm:text-sm text-slate-400 font-chakra font-medium">
-              ${item.timeStr}
+          <div class="pt-2 border-t border-slate-100/80 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400">解鎖門檻: ${st.targetCheer} 讚</span>
+            <span class="font-bold ${passed ? 'text-emerald-600' : 'text-slate-400'}">
+              ${passed ? '✓ 已通過' : '進行中'}
             </span>
           </div>
-          <p class="text-base sm:text-lg md:text-xl font-bold text-slate-900 pl-10 sm:pl-11 leading-relaxed">
-            「${item.message}」
-          </p>
         </div>
-      `).join('');
+      `;
+    }).join('');
+  }
+
+  // 渲染快速金句按鈕
+  function renderPresetButtons() {
+    const container = document.getElementById('preset-buttons');
+    if (!container) return;
+    container.innerHTML = PRESET_MESSAGES.map(msg => `
+      <button type="button" onclick="selectPreset('${msg}')" class="text-xs sm:text-sm bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-slate-700 font-bold px-3.5 py-2 rounded-xl border border-slate-200 transition-all cursor-pointer">
+        ${msg}
+      </button>
+    `).join('');
+  }
+
+  function selectPreset(msg) {
+    document.getElementById('input-text').value = msg;
+  }
+
+  // 發送自訂打氣留言
+  function handleSendCustomMessage(e) {
+    e.preventDefault();
+    const senderInput = document.getElementById('input-sender');
+    const textInput = document.getElementById('input-text');
+    const message = textInput.value.trim();
+    if (!message) {
+      showToast('請輸入加油激勵內容！');
+      textInput.focus();
+      return;
     }
 
-    // 渲染動態牆
-    function setWallFilter(filter) {
-      currentFilter = filter;
-      ['all', 'custom', 'cheers'].forEach(f => {
-        const btn = document.getElementById(`filter-btn-${f}`);
-        if (f === filter) {
-          btn.className = `px-2.5 py-1 rounded-lg transition-all cursor-pointer bg-white ${f === 'custom' ? 'text-indigo-600' : f === 'cheers' ? 'text-emerald-600' : 'text-blue-600'} shadow-xs`;
-        } else {
-          btn.className = 'px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-500 hover:text-slate-800';
-        }
-      });
-      renderActivityLog();
-    }
+    const sender = senderInput.value.trim() || '熱血隊友';
+    const emojis = ['🔥', '💪', '👏', '🚴‍♂️', '⭐', '🚀'];
+    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-    function renderActivityLog() {
-      const container = document.getElementById('activity-log');
-      const allCount = document.getElementById('all-log-count');
-      const customBadge = document.getElementById('custom-badge-pill');
-      const customMsgs = activities.filter(a => a.type === 'custom');
+    const newObj = {
+      id: 'msg-' + Date.now(),
+      type: 'custom',
+      sender,
+      message,
+      emoji,
+      timeStr: '剛剛'
+    };
 
-      allCount.innerText = activities.length;
-      customBadge.innerText = customMsgs.length;
+    activities.unshift(newObj);
+    counts.power++;
+    playSound('power');
+    saveData();
+    updateDisplay();
 
-      const filtered = activities.filter(item => {
-        if (currentFilter === 'custom') return item.type === 'custom';
-        if (currentFilter === 'cheers') return item.type !== 'custom';
-        return true;
-      });
+    textInput.value = '';
+    showToast('成功送出打氣留言！🚀');
+  }
 
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-center text-slate-400 py-6 italic text-sm">點擊上方按鈕，成為第一個發送應援的人！</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const isCustom = item.type === 'custom';
-        return `
-          <div class="flex items-center justify-between p-3 rounded-2xl border transition-all ${isCustom ? 'bg-gradient-to-r from-indigo-50/80 to-blue-50/40 border-indigo-200/90 shadow-xs' : 'bg-slate-50 hover:bg-blue-50/40 border-slate-100'}">
-            <div class="flex items-center space-x-2.5 overflow-hidden">
-              <span class="text-xl select-none flex-shrink-0">${item.emoji}</span>
-              <div class="truncate">
-                ${isCustom ? `
-                  <div class="flex items-center gap-2">
-                    <span class="font-black text-indigo-700 text-xs sm:text-sm bg-indigo-100 px-2 py-0.5 rounded-md flex-shrink-0">
-                      ${item.sender || '隊友'} 留言
-                    </span>
-                    <span class="font-bold text-slate-900 text-sm sm:text-base truncate">
-                      「${item.message}」
-                    </span>
-                  </div>
-                ` : `
-                  <div>
-                    ${item.sender ? `<span class="font-black text-indigo-600 mr-1.5 text-xs bg-indigo-50 px-2 py-0.5 rounded-md">${item.sender}</span>` : ''}
-                    <span class="font-bold text-slate-800 text-xs sm:text-sm">${item.message}</span>
-                  </div>
-                `}
-              </div>
-            </div>
-            <span class="text-[11px] text-slate-400 font-chakra font-medium ml-2 flex-shrink-0">${item.timeStr}</span>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // LINE 分享文字生成
-    function generateShareReport() {
-      const timeNow = new Date().toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      const total = counts.like + counts.power + counts.clap;
-      const percent = Math.min(100, Math.round((total / 615) * 100));
-      const customMsgs = activities.filter(a => a.type === 'custom');
-      const recentShoutouts = customMsgs.slice(0, 3).map(m => `「${m.sender || '隊友'}」：${m.message}`);
-
-      let text = `🚴‍♂️【2026 TBA 四極燈塔 620 挑戰 - 139衝衝隊應援戰報】🔥\n` +
-                 `⏱ 戰報時間：${timeNow}\n\n` +
-                 `👍 按讚數：${counts.like.toLocaleString()}\n` +
-                 `💪 加油數：${counts.power.toLocaleString()}\n` +
-                 `👏 拍手數：${counts.clap.toLocaleString()}\n` +
-                 `⚡ 總火力輸出：${total.toLocaleString()} 次！\n` +
-                 `🏁 挑戰完成度：${percent}% (615KM 征途)\n` +
-                 `📍 路線：新北福隆0km → 富貴角75km → 風情海岸185km → 王功305km → 將軍405km → 國聖燈塔425km → 東港525km → 墾丁海山615km\n`;
-
-      if (recentShoutouts.length > 0) {
-        text += `\n💬 隊友最新熱血喊話：\n${recentShoutouts.join('\n')}\n`;
-      }
-
-      text += `\n「踏動每一轉踏板，615KM 征途我們來了！」\n隊友們頂住！全員平安完賽！🚴💨🔥`;
-      return text;
-    }
-
-    function shareStats() {
-      const text = generateShareReport();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          showToast('應援戰報已複製！快貼到 139衝衝隊 LINE 群發送吧 🚀');
-        }).catch(() => fallbackCopy(text));
+  // 留言板與動態牆過濾
+  function setWallFilter(filter) {
+    currentFilter = filter;
+    ['all', 'custom', 'cheers'].forEach(f => {
+      const btn = document.getElementById(`filter-btn-${f}`);
+      if (f === filter) {
+        btn.className = 'px-2.5 py-1 rounded-lg transition-all cursor-pointer bg-white text-blue-600 shadow-xs';
       } else {
-        fallbackCopy(text);
+        btn.className = 'px-2.5 py-1 rounded-lg transition-all cursor-pointer text-slate-500 hover:text-slate-800';
       }
+    });
+    renderActivityLog();
+  }
+
+  function renderCustomMessagesBoard() {
+    const board = document.getElementById('custom-messages-board');
+    const badge = document.getElementById('custom-msg-count-badge');
+    const badgePill = document.getElementById('custom-badge-pill');
+    const customMsgs = activities.filter(a => a.type === 'custom');
+
+    if (badge) badge.innerText = `共 ${customMsgs.length} 則`;
+    if (badgePill) badgePill.innerText = customMsgs.length;
+    if (!board) return;
+
+    if (customMsgs.length === 0) {
+      board.innerHTML = `
+        <div class="text-center py-8 text-slate-400 text-xs sm:text-sm bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          目前尚無留言，趕緊留下第一句打氣話語吧！
+        </div>
+      `;
+      return;
     }
 
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
+    board.innerHTML = customMsgs.map(item => `
+      <div class="bg-indigo-50/40 hover:bg-indigo-50/80 p-3.5 sm:p-4 rounded-2xl border border-indigo-100/70 transition-all flex items-start gap-3">
+        <span class="text-2xl sm:text-3xl flex-shrink-0 mt-0.5">${item.emoji}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-black text-slate-900 text-xs sm:text-sm">${item.sender}</span>
+            <span class="text-[10px] text-slate-400 font-medium">${item.timeStr}</span>
+          </div>
+          <p class="text-slate-700 text-sm sm:text-base font-medium break-words leading-relaxed">${item.message}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderActivityLog() {
+    const logContainer = document.getElementById('activity-log');
+    const allCountBadge = document.getElementById('all-log-count');
+    if (allCountBadge) allCountBadge.innerText = activities.length;
+    if (!logContainer) return;
+
+    let filtered = activities;
+    if (currentFilter === 'custom') {
+      filtered = activities.filter(a => a.type === 'custom');
+    } else if (currentFilter === 'cheers') {
+      filtered = activities.filter(a => a.type !== 'custom');
+    }
+
+    if (filtered.length === 0) {
+      logContainer.innerHTML = `
+        <div class="text-center py-6 text-slate-400 text-xs bg-slate-50 rounded-xl border border-dashed border-slate-200">
+          目前沒有相關動態紀錄
+        </div>
+      `;
+      return;
+    }
+
+    logContainer.innerHTML = filtered.map(item => `
+      <div class="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-100 text-xs transition-all">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="text-lg flex-shrink-0">${item.emoji}</span>
+          <span class="font-black text-slate-800 flex-shrink-0">${item.sender}</span>
+          <span class="text-slate-600 truncate">${item.message || (item.type === 'like' ? '送出一個讚 👍' : item.type === 'power' ? '送出加油 💪' : '送出拍手 👏')}</span>
+        </div>
+        <span class="text-[10px] text-slate-400 flex-shrink-0 ml-2 font-medium">${item.timeStr}</span>
+      </div>
+    `).join('');
+  }
+
+  // Toast 提示
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    const msgEl = document.getElementById('toast-msg');
+    if (!toast || !msgEl) return;
+    msgEl.innerText = msg;
+    toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+    }, 2200);
+  }
+
+  // 重置 Modal
+  function openResetModal() {
+    document.getElementById('reset-modal').classList.remove('hidden');
+  }
+
+  function closeResetModal() {
+    document.getElementById('reset-modal').classList.add('hidden');
+  }
+
+  async function confirmResetData() {
+    counts = { like: 0, power: 0, clap: 0 };
+    activities = [];
+    await saveCloudData();
+    localStorage.removeItem('bike_cheer_logs_2026');
+    updateDisplay();
+    closeResetModal();
+    showToast('已成功重置所有數據！');
+  }
+
+  // 分享功能
+  function shareStats() {
+    const total = counts.like + counts.power + counts.clap;
+    const text = `【139衝衝隊 · 2026 TBA 620挑戰加油戰報】\n` +
+                 `🔥 目前累積總應援火力：${total} 次\n` +
+                 `👍 按讚：${counts.like} | 💪 加油：${counts.power} | 👏 拍手：${counts.clap}\n` +
+                 `大家一起為勇者們集氣破風！\n` +
+                 `網址：${window.location.href}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已成功複製戰報，快貼到 LINE 群吧！📋');
+      }).catch(() => {
+        fallbackCopyText(text);
+      });
+    } else {
+      fallbackCopyText(text);
+    }
+  }
+
+  function fallbackCopyText(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
       document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('應援戰報已複製！快發到 LINE 群 🚀');
+      showToast('已成功複製戰報！📋');
+    } catch (e) {
+      showToast('複製失敗，請手動複製');
     }
+    document.body.removeChild(textarea);
+  }
 
-    function shareToLine() {
-      const text = generateShareReport();
-      window.open(`https://line.me/R/msg/text/?${encodeURIComponent(text)}`, '_blank');
-    }
+  function shareToLine() {
+    const total = counts.like + counts.power + counts.clap;
+    const text = `【139衝衝隊 2026 TBA 620挑戰】目前累積應援火力 ${total} 次！快來一起按讚集氣：${window.location.href}`;
+    const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
+    window.open(lineUrl, '_blank');
+  }
 
-    // Modal 重置
-    function openResetModal() {
-      document.getElementById('reset-modal').classList.remove('hidden');
-    }
-    function closeResetModal() {
-      document.getElementById('reset-modal').classList.add('hidden');
-    }
-    function confirmResetData() {
-      counts = { like: 0, power: 0, clap: 0 };
-      activities = [{
-        id: Date.now().toString(),
-        type: 'bell',
-        emoji: '🔄',
-        sender: '系統',
-        message: '加油數據已重新出發，再接再厲！',
-        timeStr: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
-      }];
-      saveData();
-      updateDisplay();
-      closeResetModal();
-      showToast('加油計數已成功重置！');
-    }
-
-    // Toast
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-msg').innerText = msg;
-      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-      toast.classList.add('opacity-100', 'translate-y-0');
-      setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-      }, 2800);
-    }
-
-    window.onload = init;
-  </script>
+  // 網頁載入時執行初始化
+  window.onload = init;
+</script>
 </body>
 </html>
