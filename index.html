@@ -588,6 +588,8 @@
   function init() {
     fetchCloudData(); // 改為從雲端抓取
 
+    setInterval(fetchCloudData, 2000);
+
     const savedLogs = localStorage.getItem('bike_cheer_logs_2026');
     if (savedLogs) {
       try { activities = JSON.parse(savedLogs); } catch(e) {}
