@@ -117,8 +117,7 @@
       <div class="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
 
       <div class="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 px-5 py-2 rounded-full text-base md:text-lg font-black mb-3 border border-blue-200/70 shadow-sm">
-        <i class="fa-solid fa-flag-checkered text-blue-600"></i>
-        <span>139衝衝隊 · 極限挑戰團</span>
+        <span>139衝衝隊 · 極限挑戰</span>
       </div>
 
       <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-3">
@@ -152,16 +151,16 @@
     </div>
 
     <!-- 三大分頁切換按鈕 -->
-    <div class="flex p-1 bg-slate-200/70 rounded-2xl mb-6 max-w-md mx-auto">
-      <button id="tab-btn-cheer" onclick="switchTab('cheer')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
+<div class="flex p-1.5 bg-slate-200/70 rounded-2xl mb-6 max-w-lg mx-auto">
+      <button id="tab-btn-cheer" onclick="switchTab('cheer')" class="flex-1 py-2.5 text-sm md:text-base font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
         <span>按讚加油</span>
       </button>
-      <button id="tab-btn-lighthouses" onclick="switchTab('lighthouses')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+      <button id="tab-btn-lighthouses" onclick="switchTab('lighthouses')" class="flex-1 py-2.5 text-sm md:text-base font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
         <i class="fa-solid fa-location-dot"></i>
-        <span>四極燈塔路線</span>
+        <span>四極點路線</span>
       </button>
-      <button id="tab-btn-shoutouts" onclick="switchTab('shoutouts')" class="flex-1 py-2 text-xs md:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+      <button id="tab-btn-shoutouts" onclick="switchTab('shoutouts')" class="flex-1 py-2.5 text-sm md:text-base font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
         <i class="fa-regular fa-comment-dots"></i>
         <span>打氣留言版</span>
       </button>
@@ -476,7 +475,7 @@
           osc1.frequency.setValueAtTime(2093, now + delay);
           osc2.type = 'sine';
           osc2.frequency.setValueAtTime(2489, now + delay);
-          gain.gain.setValueAtTime(0.8, now + delay);
+          gain.gain.setValueAtTime(0.9, now + delay);
           gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + 0.35);
           osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
           osc1.start(now + delay); osc2.start(now + delay);
