@@ -763,13 +763,13 @@
     const emojis = ['🔥', '💪', '👏', '🚴‍♂️', '⭐', '🚀'];
     const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-    const newObj = {
+    const newMsg = {
       id: 'msg-' + Date.now(),
       type: 'custom',
-      sender,
-      message,
-      emoji,
-      timeStr: '剛剛'
+      sender: sender,
+      message: text,
+      emoji: '💬',
+      timestamp: Date.now()  // 改成記錄時間戳記
     };
 
     activities.unshift(newObj);
