@@ -7,22 +7,7 @@
   <meta name="description" content="2026 TBA 四極燈塔 620 挑戰 139衝衝隊專屬線上應援加油站，提供按讚、加油、拍手熱血集氣與戰報分享。">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  // 計算真實時間差的輔助函式
-function getTimeAgo(timestamp) {
-  if (!timestamp) return '剛剛';
-  const seconds = Math.floor((Date.now() - timestamp) / 1000);
-  
-  if (seconds < 60) return '剛剛';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}分鐘前`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}小時前`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}天前`;
-  
-  const date = new Date(timestamp);
-  return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-}
+
   <!-- Font Awesome 圖標 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Google 字體 -->
